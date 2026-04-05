@@ -208,6 +208,9 @@ bool g_UsePerspectiveProjection = true;
 // Variável que controla se o texto informativo será mostrado na tela.
 bool g_ShowInfoText = true;
 
+// Raio da órbita do coelho
+float g_BunnyOrbitRadius = 2.0f;
+
 // Variáveis que definem um programa de GPU (shaders). Veja função LoadShadersFromFiles().
 GLuint g_GpuProgramID = 0;
 GLint g_model_uniform;
@@ -244,7 +247,7 @@ int main(int argc, char* argv[])
     // Criamos uma janela do sistema operacional, com 800 colunas e 600 linhas
     // de pixels, e com título "INF01047 ...".
     GLFWwindow* window;
-    window = glfwCreateWindow(800, 600, "INF01047 - Seu Cartao - Seu Nome", NULL, NULL);
+    window = glfwCreateWindow(800, 600, "INF01047 - 587076 - Guilherme Hilgert Feroleto", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -322,6 +325,9 @@ int main(int argc, char* argv[])
     while (!glfwWindowShouldClose(window))
     {
         // Aqui executamos as operações de renderização
+
+        // Obtemos o tempo decorrido desde o início do programa
+        float time = (float)glfwGetTime();
 
         // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
         // definida como coeficientes RGBA: Red, Green, Blue, Alpha; isto é:
@@ -401,13 +407,14 @@ int main(int argc, char* argv[])
         #define PLANE  2
 
         // Desenhamos o modelo da esfera
-        model = Matrix_Translate(-1.0f,0.0f,0.0f);
+        model = Matrix_Translate(-1.0f,-0.7f,0.0f) * Matrix_Scale(0.3f, 0.3f, 0.3f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
         DrawVirtualObject("the_sphere");
 
         // Desenhamos o modelo do coelho
-        model = Matrix_Translate(1.0f,0.0f,0.0f);
+        //model = Matrix_Rotate_Y(time * 1.0f) * Matrix_Translate(g_BunnyOrbitRadius,-0.5f,0.0f) * Matrix_Rotate_Z(time * 2.0f) * Matrix_Scale(0.5f, 0.5f, 0.5f);
+        model = Matrix_Rotate_Y(time * 1.0f) * Matrix_Translate(g_BunnyOrbitRadius,-0.5f,0.0f) * Matrix_Scale(0.5f, 0.5f, 0.5f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, BUNNY);
         DrawVirtualObject("the_bunny");
