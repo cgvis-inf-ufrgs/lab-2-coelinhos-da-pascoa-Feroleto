@@ -406,15 +406,41 @@ int main(int argc, char* argv[])
         #define BUNNY  1
         #define PLANE  2
 
-        // Desenhamos o modelo da esfera
-        model = Matrix_Translate(-1.0f,-0.7f,0.0f) * Matrix_Scale(0.3f, 0.3f, 0.3f);
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
         DrawVirtualObject("the_sphere");
 
+        /*
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 3.14159f)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere2"); */
+        
         // Desenhamos o modelo do coelho
-        //model = Matrix_Rotate_Y(time * 1.0f) * Matrix_Translate(g_BunnyOrbitRadius,-0.5f,0.0f) * Matrix_Rotate_Z(time * 2.0f) * Matrix_Scale(0.5f, 0.5f, 0.5f);
-        model = Matrix_Rotate_Y(time * 1.0f) * Matrix_Translate(g_BunnyOrbitRadius,-0.5f,0.0f) * Matrix_Scale(0.5f, 0.5f, 0.5f);
+        model = Matrix_Rotate_Y(time * 0.5f) // rotação da órbita do coelho
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, BUNNY);
         DrawVirtualObject("the_bunny");
