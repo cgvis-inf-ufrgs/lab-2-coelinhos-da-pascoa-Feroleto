@@ -122,6 +122,9 @@ void LoadShader(const char* filename, GLuint shader_id); // Função utilizada p
 GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id); // Cria um programa de GPU
 void PrintObjModelInfo(ObjModel*); // Função para debugging
 
+// Função para renderizar um conjunto de coelho e ovos
+void RenderBunnySet(float orbit_offset, float wave_phase);
+
 // Declaração de funções auxiliares para renderizar texto dentro da janela
 // OpenGL. Estas funções estão definidas no arquivo "textrendering.cpp".
 void TextRendering_Init();
@@ -210,6 +213,12 @@ bool g_ShowInfoText = true;
 
 // Raio da órbita do coelho
 float g_BunnyOrbitRadius = 2.0f;
+
+float g_BunnySpace = 0.392699f; // Distância entre cada coelho
+
+// Arrays para fases ondulatórias e offsets orbitais
+float g_WavePhases[16] = {0.0f, 1.5708f, 3.14159f, 4.71239f, 0.0f, 1.5708f, 3.14159f, 4.71239f, 0.0f, 1.5708f, 3.14159f, 4.71239f, 0.0f, 1.5708f, 3.14159f, 4.71239f};
+float g_OrbitOffsets[16] = {0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f};
 
 // Variáveis que definem um programa de GPU (shaders). Veja função LoadShadersFromFiles().
 GLuint g_GpuProgramID = 0;
@@ -411,9 +420,9 @@ int main(int argc, char* argv[])
         // COELHO
         model = Matrix_Rotate_Y(time * 0.5f) // rotação da órbita do coelho
         * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
-        * Matrix_Translate(0.0f, sin(time * 2.0f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
         * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
-        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
         * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
         
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
@@ -423,7 +432,7 @@ int main(int argc, char* argv[])
         // OVO 1
         model = Matrix_Rotate_Y(time * 0.5f)
         * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
-        * Matrix_Translate(0.0f, sin(time * 2.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
         * Matrix_Rotate_Z(time * 2.0f)
         * Matrix_Translate(0.0f, 0.5f, 0.0f)
         * Matrix_Rotate_Z(-time * 2.0f)
@@ -436,7 +445,7 @@ int main(int argc, char* argv[])
         // OVO 2
         model = Matrix_Rotate_Y(time * 0.5f)
         * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
-        * Matrix_Translate(0.0f, sin(time * 2.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
         * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
         * Matrix_Translate(0.0f, 0.5f, 0.0f)
         * Matrix_Rotate_Z(-time * 2.0f)
@@ -451,9 +460,9 @@ int main(int argc, char* argv[])
         // CONJUNTO 2
 
         // COELHO
-        model = Matrix_Rotate_Y(time * 0.5f + 1.5708f) // rotação da órbita do coelho, atrasada
+        model = Matrix_Rotate_Y(time * 0.5f + g_BunnySpace) // rotação da órbita do coelho, atrasada
         * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
-        * Matrix_Translate(0.0f, sin(time * 2.0f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
         * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
         /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
         * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
@@ -463,9 +472,9 @@ int main(int argc, char* argv[])
         DrawVirtualObject("the_bunny");
         
         // OVO 1
-        model = Matrix_Rotate_Y(time * 0.5f + 1.5708f)
+        model = Matrix_Rotate_Y(time * 0.5f + g_BunnySpace)
         * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
-        * Matrix_Translate(0.0f, sin(time * 2.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
         * Matrix_Rotate_Z(time * 2.0f)
         * Matrix_Translate(0.0f, 0.5f, 0.0f)
         * Matrix_Rotate_Z(-time * 2.0f)
@@ -475,11 +484,598 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, SPHERE);
         DrawVirtualObject("the_sphere");
 
-        
         // OVO 2
-        model = Matrix_Rotate_Y(time * 0.5f + 1.5708f)
+        model = Matrix_Rotate_Y(time * 0.5f + g_BunnySpace)
         * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
-        * Matrix_Translate(0.0f, sin(time * 2.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 3
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 2 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 2 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 2 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 4
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 3 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 3 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 3 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 5
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 4 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        * Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 4 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 4 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 6
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 5 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 5 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 5 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 7
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 6 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 6 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 6 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 8
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 7 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 7 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 7 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 9
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 8 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        * Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 8 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 8 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 10
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 9 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 9 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 9 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 11
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 10 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 10 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 10 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 12
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 11 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 11 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 11 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 13
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 12 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        * Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 12 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 12 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 0.0f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 14
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 13 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 13 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 13 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 1.5708f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 15
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 14 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 14 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 14 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 3.14159f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // =======================================================
+
+        // CONJUNTO 16
+
+        // COELHO
+        model = Matrix_Rotate_Y(time * 0.5f + 15 * g_BunnySpace) // rotação da órbita do coelho, atrasada
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f,0.0f) // posição do coelho na órbita
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // movimento ondulatório em Y
+        * Matrix_Rotate_Y(-1.5708f) // rotação de 90 graus do coelho
+        /** Matrix_Rotate_Z(time * 2.0f) // rotação do coelho em torno de seu próprio eixo Z */
+        * Matrix_Scale(0.35f, 0.35f, 0.35f); // escala do modelo
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, BUNNY);
+        DrawVirtualObject("the_bunny");
+        
+        // OVO 1
+        model = Matrix_Rotate_Y(time * 0.5f + 15 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
+        * Matrix_Rotate_Z(time * 2.0f)
+        * Matrix_Translate(0.0f, 0.5f, 0.0f)
+        * Matrix_Rotate_Z(-time * 2.0f)
+        * Matrix_Scale(0.1f, 0.16f, 0.1f);
+        
+        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, SPHERE);
+        DrawVirtualObject("the_sphere");
+
+        // OVO 2
+        model = Matrix_Rotate_Y(time * 0.5f + 15 * g_BunnySpace)
+        * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+        * Matrix_Translate(0.0f, sin(time * 2.0f + 4.71239f) * 0.5f - 0.15f, 0.0f) // acompanha movimento ondulatório do coelho
         * Matrix_Rotate_Z(time * 2.0f + 3.141592f) // rotação de 180 graus para o segundo ovo
         * Matrix_Translate(0.0f, 0.5f, 0.0f)
         * Matrix_Rotate_Z(-time * 2.0f)
@@ -528,6 +1124,52 @@ int main(int argc, char* argv[])
 
     // Fim do programa
     return 0;
+}
+
+// Função para renderizar um conjunto de coelho e ovos
+void RenderBunnySet(float orbit_offset, float wave_phase)
+{
+    // Obtém o tempo decorrido
+    float time = (float)glfwGetTime();
+
+    glm::mat4 model;
+
+    // COELHO
+    model = Matrix_Rotate_Y(time * 0.5f + orbit_offset)
+    * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+    * Matrix_Translate(0.0f, sin(time * 2.0f + wave_phase) * 0.5f - 0.15f, 0.0f)
+    * Matrix_Rotate_Y(-1.5708f)
+    * Matrix_Scale(0.35f, 0.35f, 0.35f);
+    
+    glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+    glUniform1i(g_object_id_uniform, BUNNY);
+    DrawVirtualObject("the_bunny");
+
+    // OVO 1
+    model = Matrix_Rotate_Y(time * 0.5f + orbit_offset)
+    * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+    * Matrix_Translate(0.0f, sin(time * 2.0f + wave_phase) * 0.5f - 0.15f, 0.0f)
+    * Matrix_Rotate_Z(time * 2.0f)
+    * Matrix_Translate(0.0f, 0.5f, 0.0f)
+    * Matrix_Rotate_Z(-time * 2.0f)
+    * Matrix_Scale(0.1f, 0.16f, 0.1f);
+    
+    glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+    glUniform1i(g_object_id_uniform, SPHERE);
+    DrawVirtualObject("the_sphere");
+
+    // OVO 2
+    model = Matrix_Rotate_Y(time * 0.5f + orbit_offset)
+    * Matrix_Translate(g_BunnyOrbitRadius, 0.0f, 0.0f)
+    * Matrix_Translate(0.0f, sin(time * 2.0f + wave_phase) * 0.5f - 0.15f, 0.0f)
+    * Matrix_Rotate_Z(time * 2.0f + 3.141592f)
+    * Matrix_Translate(0.0f, 0.5f, 0.0f)
+    * Matrix_Rotate_Z(-time * 2.0f)
+    * Matrix_Scale(0.1f, 0.16f, 0.1f);
+    
+    glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+    glUniform1i(g_object_id_uniform, SPHERE);
+    DrawVirtualObject("the_sphere");
 }
 
 // Função que desenha um objeto armazenado em g_VirtualScene. Veja definição
